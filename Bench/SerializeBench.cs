@@ -7,14 +7,16 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+#if UNITY
 using UnityEngine;
+#endif
 
 namespace Bench
 {
-    [MemoryDiagnoser]
+    [MemoryDiagnoser, MediumRunJob, DisassemblyDiagnoser(recursiveDepth : 5)]
     public class SerializeBench
     {
-        private const int AMOUNT = 1024;
+        private const int AMOUNT = 4096;
         private readonly byte[] m_byteBuf;
         private readonly IntPtr m_ptrBuf;
         private const int SIZE = AMOUNT * sizeof(int) + AMOUNT;
@@ -65,7 +67,7 @@ namespace Bench
             }
         }
 
-        //[Benchmark]
+        [Benchmark]
         public void BitRead()
         {
             BitStreamer stream = new BitStreamer();
@@ -82,6 +84,26 @@ namespace Bench
             {
                 bool b = stream.ReadBool();
                 int num = stream.ReadInt32();
+            }
+        }
+
+        [Benchmark]
+        public void BitRead2()
+        {
+            BitStreamer stream = new BitStreamer();
+            stream.ResetWrite(m_ptrBuf, SIZE, false);
+
+            for (int i = 0; i < AMOUNT / 2; i++)
+            {
+                stream.WriteBool(i % 2 == 0);
+                stream.WriteInt32(i);
+            }
+
+            stream.ResetRead();
+            for (int i = 0; i < AMOUNT / 2; i++)
+            {
+                bool b = stream.ReadBool2();
+                int num = stream.ReadInt32_2();
             }
         }
 
@@ -134,6 +156,7 @@ namespace Bench
             }
         }
 
+#if UNITY
         //[Benchmark]
         public void VectorOld()
         {
@@ -152,8 +175,9 @@ namespace Bench
                 var vect = stream.ReadVector2();
             }
         }
+        #endif
 
-        [Benchmark]
+        // [Benchmark]
         public void StringWrite()
         {
             BitStreamer stream = new BitStreamer();

@@ -1,4 +1,5 @@
-﻿using BitSerializer.Utils;
+﻿#if UNITY
+using BitSerializer.Utils;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
@@ -522,3 +523,4 @@ namespace BitSerializer
         }
     }
 }
+#endif

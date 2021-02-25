@@ -427,6 +427,15 @@ namespace BitSerializer
             return value;
         }
 
+        private ulong Read2(int bits)
+        {
+            EnsureReadSize2(bits);
+
+            ulong value = InternalPeek(bits);
+            m_offset += bits;
+            return value;
+        }
+
         /// <summary>
         /// Reads a value without ensuring the buffer size.
         /// </summary>
@@ -521,7 +530,29 @@ namespace BitSerializer
             // Casting to uint also checks negative bitCount values.
             if (m_offset + (uint)bitCount > m_fullBitLength)
                 throw new InvalidOperationException("Inner buffer is exceeded");
+                // throw new InvalidOperationException();
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void EnsureReadSize2(int bitCount)
+        {
+            Debug.Assert(bitCount > 0, "Amount of bits must be larger than zero.");
+            Debug.Assert(m_mode == SerializationMode.Reading);
+
+            // Casting to uint also checks negative bitCount values.
+            if (m_offset + (uint)bitCount > m_fullBitLength)
+                // ThrowHelper();
+                throw new InvalidOperationException();
+        }
+
+        // [DoesNotReturn]
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void ThrowHelper()
+        {
+            // new InvalidOperationException("Inner buffer is exceeded");
+            new InvalidOperationException();
+        }
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureWriteSize(int bitCount)

@@ -32,6 +32,11 @@ namespace BitSerializer
             return Read(1) == 1;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool ReadBool2()
+        {
+            return Read2(1) == 1;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public sbyte ReadSByte(int bitCount = 8)
         {
             return (sbyte)ZigZag.Zag(ReadUInt32(bitCount));
@@ -45,6 +50,11 @@ namespace BitSerializer
         public int ReadInt32(int bitCount = 32)
         {
             return ZigZag.Zag(ReadUInt32(bitCount));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int ReadInt32_2(int bitCount = 32)
+        {
+            return ZigZag.Zag(ReadUInt32_2(bitCount));
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public long ReadLong(int bitCount = 64)
@@ -65,6 +75,11 @@ namespace BitSerializer
         public uint ReadUInt32(int bitCount = 32)
         {
             return unchecked((uint)Read(bitCount));
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public uint ReadUInt32_2(int bitCount = 32)
+        {
+            return unchecked((uint)Read2(bitCount));
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong ReadULong(int bitCount = 64)
