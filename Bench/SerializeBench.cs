@@ -1,5 +1,4 @@
-﻿using BenchmarkDotNet.Attributes;
-using BitSerializer;
+﻿using BitSerializer;
 using BitSerializer.Utils;
 using ByteStream.Mananged;
 using ByteStream.Unmanaged;
@@ -7,13 +6,18 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Jobs;
 #if UNITY
 using UnityEngine;
 #endif
 
 namespace Bench
 {
-    [MemoryDiagnoser, MediumRunJob, DisassemblyDiagnoser(recursiveDepth : 5)]
+    [MemoryDiagnoser]
+    [DisassemblyDiagnoser(maxDepth: 5)]
+    [MediumRunJob(runtimeMoniker: RuntimeMoniker.NetCoreApp21)]
+    [MediumRunJob(runtimeMoniker: RuntimeMoniker.NetCoreApp50)]
     public class SerializeBench
     {
         private const int AMOUNT = 4096;
@@ -67,8 +71,28 @@ namespace Bench
             }
         }
 
+        [Benchmark(Baseline = true)]
+        public void BitReadString()
+        {
+            BitStreamer stream = new BitStreamer();
+            stream.ResetWrite(m_ptrBuf, SIZE, false);
+
+            for (int i = 0; i < AMOUNT / 2; i++)
+            {
+                stream.WriteBool(i % 2 == 0);
+                stream.WriteInt32(i);
+            }
+
+            stream.ResetRead();
+            for (int i = 0; i < AMOUNT / 2; i++)
+            {
+                bool b = stream.ReadBoolWithString();
+                int num = stream.ReadInt32WithString();
+            }
+        }
+
         [Benchmark]
-        public void BitRead()
+        public void BitReadNoString()
         {
             BitStreamer stream = new BitStreamer();
             stream.ResetWrite(m_ptrBuf, SIZE, false);
@@ -88,7 +112,7 @@ namespace Bench
         }
 
         [Benchmark]
-        public void BitRead2()
+        public void BitReadStringInline()
         {
             BitStreamer stream = new BitStreamer();
             stream.ResetWrite(m_ptrBuf, SIZE, false);
@@ -102,8 +126,28 @@ namespace Bench
             stream.ResetRead();
             for (int i = 0; i < AMOUNT / 2; i++)
             {
-                bool b = stream.ReadBool2();
-                int num = stream.ReadInt32_2();
+                bool b = stream.ReadBoolWithStringInline();
+                int num = stream.ReadInt32WithStringInline();
+            }
+        }
+
+        [Benchmark]
+        public void BitReadNoStringInline()
+        {
+            BitStreamer stream = new BitStreamer();
+            stream.ResetWrite(m_ptrBuf, SIZE, false);
+
+            for (int i = 0; i < AMOUNT / 2; i++)
+            {
+                stream.WriteBool(i % 2 == 0);
+                stream.WriteInt32(i);
+            }
+
+            stream.ResetRead();
+            for (int i = 0; i < AMOUNT / 2; i++)
+            {
+                bool b = stream.ReadBoolInline();
+                int num = stream.ReadInt32Inline();
             }
         }
 

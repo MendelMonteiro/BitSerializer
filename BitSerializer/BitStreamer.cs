@@ -427,9 +427,27 @@ namespace BitSerializer
             return value;
         }
 
-        private ulong Read2(int bits)
+        private ulong ReadInline(int bits)
         {
-            EnsureReadSize2(bits);
+            EnsureReadSizeInline(bits);
+
+            ulong value = InternalPeek(bits);
+            m_offset += bits;
+            return value;
+        }
+
+        private ulong ReadWithString(int bits)
+        {
+            EnsureReadSizeWithString(bits);
+
+            ulong value = InternalPeek(bits);
+            m_offset += bits;
+            return value;
+        }
+
+        private ulong ReadWithStringInline(int bits)
+        {
+            EnsureReadWithSizeStringInline(bits);
 
             ulong value = InternalPeek(bits);
             m_offset += bits;
@@ -521,7 +539,6 @@ namespace BitSerializer
                 m_buffer[longOffsetEnd] = value >> (64 - placeOffset);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureReadSize(int bitCount)
         {
             Debug.Assert(bitCount > 0, "Amount of bits must be larger than zero.");
@@ -529,20 +546,39 @@ namespace BitSerializer
 
             // Casting to uint also checks negative bitCount values.
             if (m_offset + (uint)bitCount > m_fullBitLength)
-                throw new InvalidOperationException("Inner buffer is exceeded");
-                // throw new InvalidOperationException();
+                throw new InvalidOperationException();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void EnsureReadSize2(int bitCount)
+        private void EnsureReadSizeInline(int bitCount)
         {
             Debug.Assert(bitCount > 0, "Amount of bits must be larger than zero.");
             Debug.Assert(m_mode == SerializationMode.Reading);
 
             // Casting to uint also checks negative bitCount values.
             if (m_offset + (uint)bitCount > m_fullBitLength)
-                // ThrowHelper();
                 throw new InvalidOperationException();
+        }
+
+        private void EnsureReadSizeWithString(int bitCount)
+        {
+            Debug.Assert(bitCount > 0, "Amount of bits must be larger than zero.");
+            Debug.Assert(m_mode == SerializationMode.Reading);
+
+            // Casting to uint also checks negative bitCount values.
+            if (m_offset + (uint)bitCount > m_fullBitLength)
+                throw new InvalidOperationException("Inner buffer is exceeded");
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void EnsureReadWithSizeStringInline(int bitCount)
+        {
+            Debug.Assert(bitCount > 0, "Amount of bits must be larger than zero.");
+            Debug.Assert(m_mode == SerializationMode.Reading);
+
+            // Casting to uint also checks negative bitCount values.
+            if (m_offset + (uint)bitCount > m_fullBitLength)
+                throw new InvalidOperationException("Inner buffer is exceeded");
         }
 
         // [DoesNotReturn]
